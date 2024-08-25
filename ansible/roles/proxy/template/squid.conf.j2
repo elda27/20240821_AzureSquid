@@ -1,8 +1,21 @@
 # Squid Config File
+acl intermediate_fetching transaction_initiator certificate-fetching
+http_access allow intermediate_fetching
 
 # ポート設定
-http_port 3128
-https_port 3129 ssl-bump cert=/etc/squid/squid.pem key=/etc/squid/squid.key
+# http_port 3128
+http_port 3128 \
+  tcpkeepalive=60,30,3 \
+  ssl-bump \
+  generate-host-certificates=on \
+  dynamic_cert_mem_cache_size=20MB \
+  tls-cert=/etc/squid/squid.pem \
+  tls-key=/etc/squid/squid.key \
+  tls-dh=/etc/squid/dhparam.pem \
+  cipher=HIGH:MEDIUM:!LOW:!RC4:!SEED:!IDEA:!3DES:!MD5:!EXP:!PSK:!DSS \
+  options=NO_TLSv1,NO_SSLv3
+
+# https_port 3129 ssl-bump cert=/etc/squid/squid.pem key=/etc/squid/squid.key
 
 # ACLの設定
 acl localnet src 10.0.0.0/16      # クラスA（10.0.0.0/16）
@@ -16,7 +29,7 @@ acl Safe_ports port 443       # HTTPS
 acl CONNECT method CONNECT
 
 # 特定のFQDNへのアクセスを許可するACLを外部ファイルに保存
-acl allowed_sites dstdomain "/etc/squid/allowed_sites.txt"
+acl allowed_sites dstdomain "/etc/squid/allow_sites.txt"
 
 # 許可されたFQDNのみアクセス許可
 http_access allow allowed_sites localnet
@@ -37,21 +50,22 @@ http_access allow localhost
 http_access deny all
 
 # SSL Bump 設定
-ssl_bump peek step1
-ssl_bump splice all
-
-# SSL証明書の管理
-sslcrtd_program /usr/lib/squid/security_file_certgen -s /var/lib/squid/ssl_db -M 4MB
+sslcrtd_program /usr/lib/squid/security_file_certgen -s /var/lib/squid/ssl_db -M 20MB
 sslcrtd_children 8 startup=1 idle=1
+sslproxy_cert_error allow all
+ssl_bump stare all
 
 # SSL関連の設定
 tls_outgoing_options flags=DONT_VERIFY_PEER
-tls_outgoing_options tls_min_version=1.2
+tls_outgoing_options min-version=1.2
 
 # キャッシュの設定
 cache_mem {{squid_cache_mem_size | default('256 MB')}}
 maximum_object_size_in_memory 512 KB
-cache_dir ufs /var/spool/squid/cache {{ squid_cache_disk_size_mb | default('10000') }} {{ squid_cache_disk_l1_count | default('16') }} {{ squid_cache_disk_l2_count | default('256') }}
+cache_dir ufs /var/spool/squid/cache\
+  {{ squid_cache_disk_size_mb | default('10000') }} \
+  {{ squid_cache_disk_l1_count | default('16') }} \
+  {{ squid_cache_disk_l2_count | default('256') }}
 maximum_object_size 4 MB
 minimum_object_size 0 KB
 
@@ -67,9 +81,8 @@ cache_store_log /var/log/squid/store.log
 logformat squid_extended %ts.%03tu %6tr %>a %Ss/%03>Hs %<st %rm %ru %Sh/%<A %mt
 access_log /var/log/squid/access.log squid_extended
 
-# Squidのデフォルトセキュリティ設定
-coredump_dir /var/spool/squid/coredump
-visible_hostname myproxy.local
+coredump_dir /var/spool/squid
+# visible_hostname myproxy.local
 
 # HTTPヘッダーの隠蔽
 via off
