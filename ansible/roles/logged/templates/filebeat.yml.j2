@@ -1,0 +1,28 @@
+# See: https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-reference-yml.html
+metricbeat.config.modules:
+  path: ${path.config}/modules.d/*.yml
+  reload.period: {{ metricbeat_config_reload_period | default('10s') }}
+
+filebeat.modules:
+- module: system
+  syslog:
+    enabled: true
+    var.paths: ["/var/log/syslog"]
+  auth:
+    enabled: true
+    var.paths: ["/var/log/auth.log"]
+  var.paths: ["/var/log/*.log"]
+
+filebeat.inputs:
+- type: syslog
+  format: rfc5424
+  protocol.udp:
+    host: "localhost:9000"
+
+{% if logstash_available %}
+output.logstash:
+  hosts: 
+    {% for host in logstash_host -%}
+    - {{ host }}
+    {% endfor %}
+{% endif %}

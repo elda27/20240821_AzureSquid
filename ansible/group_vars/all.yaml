@@ -1,0 +1,23 @@
+logstash_available: true
+logstash_host:
+  - 10.0.1.1
+metricbeat_index_name: metricbeat
+metricbeat_ttl: 30s
+metricbeat_enabled: true
+logstash_loadbalance: false
+metricbeat_metricsets:
+  - cpu # CPU usage
+  - load # CPU load averages
+  - memory # Memory usage
+  - network # Network IO
+  - process # Per process metrics
+  - process_summary # Process summary
+  - uptime # System Uptime
+  - socket_summary # Socket summary
+  #- core           # Per CPU core usage
+  - diskio # Disk IO
+  #- filesystem     # File system usage for each mountpoint
+  #- fsstat         # File system summary metrics
+  #- raid           # Raid
+  #- socket         # Sockets and connection info (linux only)
+  #- service        # systemd service information

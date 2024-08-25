@@ -1,0 +1,16 @@
+- name: Install squid
+  ansible.builtin.apt:
+    name: squid
+    state: present
+    update_cache: yes
+
+- name: Allow ufw to forward traffic
+  community.general.ufw:
+    rule: allow
+    port: "3128"
+
+- name: Configure squid
+  ansible.builtin.template:
+    src: squid.conf.j2
+    dest: /etc/squid/squid-openssl.conf
+  notify: restart_squid

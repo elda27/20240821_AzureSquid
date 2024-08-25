@@ -1,0 +1,12 @@
+auth_source: auto
+all:
+  hosts:
+    localhost:
+    vm-squid-001:
+  children:
+    local:
+      hosts:
+        localhost:
+    proxy:
+      hosts:
+        vm-squid-001:

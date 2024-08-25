@@ -1,0 +1,10 @@
+name: azure-squid-private-proxy
+runtime:
+  name: python
+  options:
+    toolchain: poetry
+description: Private proxy for outbound filtering using proxy.
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: azure-python
