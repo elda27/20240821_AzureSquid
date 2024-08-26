@@ -1,0 +1,5 @@
+ansible_ssh_user: hyperv
+ansible_ssh_password: hyperv
+ansible_become_password: hyperv
+ansible_python_interpreter: /usr/bin/python3
+ansible_host: 192.168.0.18
