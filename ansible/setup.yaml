@@ -5,15 +5,16 @@
     - name: Generate secret
       ansible.builtin.import_role:
         name: secret
-# - name: Install Squid.
-#   hosts: proxy
-#   become: yes
 
-#   tasks:
-#     - name: Setup logging syslog
-#       ansible.builtin.import_role:
-#         name: logged
+- name: Install Squid.
+  hosts: proxy
+  become: yes
 
-#     - name: Setup proxy server.
-#       ansible.builtin.import_role:
-#         name: proxy
+  tasks:
+    # - name: Setup logging syslog
+    #   ansible.builtin.import_role:
+    #     name: logged
+
+    - name: Setup proxy server.
+      ansible.builtin.import_role:
+        name: proxy

@@ -1,3 +1,6 @@
+secret_dir: "{{ inventory_dir }}/../secrets"
+
+# Configure for beat
 logstash_available: true
 logstash_host:
   - 10.0.1.1

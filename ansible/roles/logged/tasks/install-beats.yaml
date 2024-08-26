@@ -1,0 +1,40 @@
+- name: Get gpg key for filebeat
+  ansible.builtin.shell:
+    cmd: >-
+      curl -XGET https://artifacts.elastic.co/GPG-KEY-elasticsearch 
+      | gpg --dearmor -o /usr/share/keyrings/elastic-keyring.gpg
+
+# TODO: Check fingerprint
+
+- name: Add repository for filebeat
+  ansible.builtin.lineinfile:
+    ansible.builtin.blockinfile:
+      path: /etc/apt/sources.list.d/elastic.list
+      block: |
+        deb [signed-by=/usr/share/keyrings/elastic-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main
+      insertafter: EOF
+
+# Syslogはとらない
+# - name: Install filebeat
+#   ansible.builtin.apt:
+#     name: filebeat
+#     state: present
+#     update_cache: yes
+
+# - name: Configure filebeat
+#   ansible.builtin.template:
+#     src: filebeat.yml.j2
+#     dest: /etc/filebeat/filebeat.yml
+#   notify: restart_filebeat
+
+- name: Install metricbeat
+  ansible.builtin.apt:
+    name: metricbeat
+    state: present
+    update_cache: yes
+
+- name: Configure metricbeat
+  ansible.builtin.template:
+    src: metricbeat.yml.j2
+    dest: /etc/metricbeat/metricbeat.yml
+  notify: restart_metricbeat

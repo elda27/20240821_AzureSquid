@@ -1,16 +1,64 @@
+- name: Copy secrets from secrets directory
+  ansible.builtin.copy:
+    src: "{{ secret_dir }}/squid/"
+    dest: /etc/squid
+    mode: 400
+
 - name: Install squid
   ansible.builtin.apt:
-    name: squid
+    name: squid-openssl
     state: present
     update_cache: yes
+
+- name: Enable squid
+  ansible.builtin.systemd:
+    name: squid
+    enabled: yes
+
+- name: Allow SSH traffic
+  community.general.ufw:
+    rule: allow
+    app: OpenSSH
 
 - name: Allow ufw to forward traffic
   community.general.ufw:
     rule: allow
-    port: "3128"
+    port: "{{squid_proxy_port}}"
+    state: enabled
+
+- name: Allow ufw to forward traffic
+  community.general.ufw:
+    rule: allow
+    port: "{{squid_proxy_port}}"
+    proto: tcp
+    state: enabled
+
+- name: Create ssl db directory
+  ansible.builtin.file:
+    path: "{{squid_cert_db_dir}}"
+    state: directory
+
+- name: Delete old ssl db
+  ansible.builtin.shell:
+    cmd: rm -rf {{squid_cert_db_dir}}
+
+- name: Create ssl db
+  ansible.builtin.shell:
+    cmd: /usr/lib/squid/security_file_certgen -c -s {{squid_cert_db_dir}} -M {{squid_cert_db_size}}
+
+# - name: Change owener
+#   ansible.builtin.file:
+#     path: "{{squid_cert_db_dir}}"
+#     owner: squid
+#     group: squid
+
+- name: Copy allow_sites.txt
+  ansible.builtin.template:
+    src: allow_sites.txt
+    dest: /etc/squid/allow_sites.txt
 
 - name: Configure squid
   ansible.builtin.template:
     src: squid.conf.j2
-    dest: /etc/squid/squid-openssl.conf
+    dest: /etc/squid/squid.conf
   notify: restart_squid

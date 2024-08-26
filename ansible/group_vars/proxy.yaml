@@ -1,8 +1,9 @@
 # 一般的なWebサーバでキャッシュ1GBあたり100MBくらいのメモリが必要になるらしい
 # https://www.comm.tcu.ac.jp/cisj/01/cisj_01_13d_hagiwara.pdf
+squid_proxy_port: 8080
 squid_cache_memory_size: 512 MB
 squid_cache_disk_size_mb: 10000
 squid_cache_disk_l1_count: 16
 squid_cache_disk_l2_count: 256
-
+squid_cert_db_dir: /var/lib/squid/ssl_db
 squid_cert_db_size: 20MB

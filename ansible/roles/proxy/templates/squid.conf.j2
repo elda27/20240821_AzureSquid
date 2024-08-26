@@ -3,8 +3,8 @@ acl intermediate_fetching transaction_initiator certificate-fetching
 http_access allow intermediate_fetching
 
 # ポート設定
-# http_port 3128
-http_port 3128 \
+# http_port {{ squid_proxy_port }}
+http_port {{ squid_proxy_port }} \
   tcpkeepalive=60,30,3 \
   ssl-bump \
   generate-host-certificates=on \
@@ -50,7 +50,7 @@ http_access allow localhost
 http_access deny all
 
 # SSL Bump 設定
-sslcrtd_program /usr/lib/squid/security_file_certgen -s /var/lib/squid/ssl_db -M 20MB
+sslcrtd_program /usr/lib/squid/security_file_certgen -s {{squid_cert_db_dir}} -M 20MB
 sslcrtd_children 8 startup=1 idle=1
 sslproxy_cert_error allow all
 ssl_bump stare all
@@ -62,7 +62,7 @@ tls_outgoing_options min-version=1.2
 # キャッシュの設定
 cache_mem {{squid_cache_mem_size | default('256 MB')}}
 maximum_object_size_in_memory 512 KB
-cache_dir ufs /var/spool/squid/cache\
+cache_dir ufs /var/spool/squid/cache \
   {{ squid_cache_disk_size_mb | default('10000') }} \
   {{ squid_cache_disk_l1_count | default('16') }} \
   {{ squid_cache_disk_l2_count | default('256') }}
